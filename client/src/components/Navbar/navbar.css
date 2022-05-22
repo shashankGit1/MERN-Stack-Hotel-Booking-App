@@ -1,0 +1,27 @@
+.navbar{
+    height: 50px;
+    background: #003580; 
+    display: flex;
+    justify-content: center;
+    /* use #003500 for green hue */
+}
+.navContainer{
+    width: 100%;
+    max-width: 1024px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.logo{
+    margin-top: 10px;
+    font-weight: 700;
+    font-size: 28px;
+}
+.navButton{
+    margin-left: 20px;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    color: #003580;
+}
