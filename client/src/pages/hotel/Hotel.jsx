@@ -1,6 +1,6 @@
 import { faCircleArrowLeft, faCircleArrowRight, faCircleXmark, faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Header from "../../components/header/Header";
 import Navbar from "../../components/Navbar/Navbar";
 import MailList from "../../components/mailList/MailList";
@@ -8,11 +8,24 @@ import Footer from "../../components/footer/Footer";
 import "./hotel.css";
 import { useLocation } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
+import { SearchContext } from "../../context/SearchContext";
 
 const Hotel = () => {
   const location = useLocation();
   const id = location.pathname.split("/")[2];
   const { data, loading, error } = useFetch(`/hotels/find/${id}`);
+  const { dates, options } = useContext(SearchContext);
+
+  const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
+  function dayDifference(date1, date2) {
+    const timeDiff = Math.abs(date2.getTime() - date1.getTime());
+    const diffDays = Math.ceil(timeDiff / MILLISECONDS_PER_DAY);
+    return diffDays;
+  }
+
+  const days = dayDifference(dates[0].endDate, dates[0].startDate);
+  // const days = dayDifference(dates[0]?.endDate, dates[0]?.startDate);
+  console.log(dates);
   const [sliderNumber, setSliderNumber] = useState(0);
   const [open, setOpen] = useState(false);
   const handleOpen = (index) => {
@@ -27,27 +40,6 @@ const Hotel = () => {
       newSliderNum = sliderNumber === 5 ? 0 : sliderNumber + 1;
     setSliderNumber(newSliderNum);
   }
-
-  // const photos = [
-  //   {
-  //     src: "https://cf.bstatic.com/static/img/theme-index/carousel_320x240/card-image-villas_300/dd0d7f8202676306a661aa4f0cf1ffab31286211.jpg",
-  //   },
-  //   {
-  //     src: "https://cf.bstatic.com/static/img/theme-index/carousel_320x240/card-image-chalet_300/8ee014fcc493cb3334e25893a1dee8c6d36ed0ba.jpg",
-  //   },
-  //   {
-  //     src: "https://cf.bstatic.com/xdata/images/xphoto/square300/57584488.webp?k=bf724e4e9b9b75480bbe7fc675460a089ba6414fe4693b83ea3fdd8e938832a6&o=",
-  //   },
-  //   {
-  //     src: "https://cf.bstatic.com/static/img/theme-index/carousel_320x240/card-image-villas_300/dd0d7f8202676306a661aa4f0cf1ffab31286211.jpg",
-  //   },
-  //   {
-  //     src: "https://cf.bstatic.com/static/img/theme-index/carousel_320x240/bg_resorts/6f87c6143fbd51a0bb5d15ca3b9cf84211ab0884.jpg",
-  //   },
-  //   {
-  //     src: "https://cf.bstatic.com/static/img/theme-index/carousel_320x240/card-image-villas_300/dd0d7f8202676306a661aa4f0cf1ffab31286211.jpg",
-  //   },
-  // ];
   return (
     <div>
       <Navbar />
@@ -94,10 +86,12 @@ const Hotel = () => {
                 </p>
               </div>
               <div className="hotelDetailsPrice">
-                <h1>Perfect for a 9 night stay!</h1>
+                <h1>Perfect for a {days}-night stay!</h1>
+                {/* <h1>Perfect for a 9-night stay!</h1> */}
                 <span>Located in the real heart of Krakow</span>
                 <h2>
-                  <b>$945</b> (9 nights)
+                  <b>${days * data.cheapestPrice * options.room}</b> ({days}{" "}
+                  nights)
                 </h2>
                 <button>Book Now</button>
               </div>
