@@ -3,19 +3,23 @@ import Header from '../../components/header/Header'
 import Navbar from '../../components/Navbar/Navbar';
 import { useLocation } from 'react-router-dom';
 import './list.css'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import format from 'date-fns/format';
 import { DateRange } from 'react-date-range';
 import SearchItem from '../../components/searchItem/SearchItem.jsx';
+import useFetch from "../../hooks/useFetch";
 const List = () => {
     const location = useLocation();
-    // console.log(location);
     const [destination, setDestination] = useState(location.state.destination);
-    const [options, setOptions] = useState(location.state.options);
-    const [date, setDate] = useState(location.state.date);
+    const [dates, setDates] = useState(location?.state?.dates);
     const [openDate, setOpenDate] = useState(false);
-
-
+    const [options, setOptions] = useState(location?.state?.options);
+    const [min, setMin] = useState(undefined);
+    const [max, setMax] = useState(undefined);
+    const { data, loading, error, reFetch } = useFetch(`/hotels?city=${destination}&min=${min || 0}&max=${max || 9999}`)
+    const handleSearchClick = () => {
+        reFetch();
+    }
     return (
         <div>
             <Navbar />
@@ -31,11 +35,11 @@ const List = () => {
                         </div>
                         <div className="lsItem">
                             <label>Check-in Date</label>
-                            <span onClick={() => setOpenDate(!openDate)}>{`${format(date[0].startDate, "MM/dd/yyyy")} to ${format(date[0].endDate, "MM/dd/yyyy")}`}</span>
+                            <span onClick={() => setOpenDate(!openDate)}>{`${format(dates[0].startDate, "MM/dd/yyyy")} to ${format(dates[0].endDate, "MM/dd/yyyy")}`}</span>
                             {openDate && (<DateRange
-                                onChange={(item) => setDate([item.selection])}
+                                onChange={(item) => setDates([item.selection])}
                                 minDate={new Date()}
-                                ranges={date}
+                                ranges={dates}
                             />)}
                         </div>
                         <div className="lsItem">
@@ -43,11 +47,11 @@ const List = () => {
                             <div className="lsOptions">
                                 <div className="lsOptionItem">
                                     <span className="lsOptionText">Min Price <small>(per night)</small></span>
-                                    <input type="number" className="lsOptionInput" />
+                                    <input type="number" onChange={e => setMin(e.target.value)} className="lsOptionInput" />
                                 </div>
                                 <div className="lsOptionItem">
                                     <span className="lsOptionText">Max Price <small>(per night)</small></span>
-                                    <input type="number" className="lsOptionInput" />
+                                    <input type="number" onChange={e => setMax(e.target.value)} className="lsOptionInput" />
                                 </div>
                                 <div className="lsOptionItem">
                                     <span className="lsOptionText">Adults</span>
@@ -63,17 +67,14 @@ const List = () => {
                                 </div>
                             </div>
                         </div>
-                        <button className="search">Search</button>
+                        <button onClick={handleSearchClick} className="search">Search</button>
                     </div>
                     <div className="listResult">
-                        <SearchItem/>
-                        <SearchItem/>
-                        <SearchItem/>
-                        <SearchItem/>
-                        <SearchItem/>
-                        <SearchItem/>
-                        <SearchItem/>
-                        
+                        {loading ? "loading" : <>
+                            {data.map(item => (
+                                <SearchItem item={item} key={item._id} />
+                            ))}
+                        </>}
                     </div>
                 </div>
             </div>
